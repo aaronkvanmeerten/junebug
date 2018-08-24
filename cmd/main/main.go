@@ -8,8 +8,8 @@ import (
 	"os/signal"
 	"time"
 
-	"bitbucket.org/atlassian/pushan"
 	"github.com/caarlos0/env"
+	"github.com/jmacelroy/junebug"
 	"github.com/justinas/alice"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/hlog"
@@ -65,9 +65,13 @@ func main() {
 		hlog.RequestIDHandler("req_id", "Request-Id"),
 	)
 
+	InteractionState := junebug.NewInteractionStateStore()
+
 	slashJuneBug := chain.ThenFunc(junebug.Slash)
+	slashJuneBugInteraction := chain.ThenFunc(InteractionState.SlashInteraction)
 
 	handler.Handle("/slash/junebug", slashJuneBug)
+	handler.Handle("/slash/junebug/interaction", slashJuneBugInteraction)
 	handler.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		fmt.Fprint(w, "buzz buzz")
